@@ -16,5 +16,6 @@ algorithms = {floydAlgo;
               stuckiAlgo;
               jarvisAlgo;              
               bnoiseAlgo};
+
 end
 

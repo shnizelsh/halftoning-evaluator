@@ -2,7 +2,7 @@ function test_sensitivity_to_color_plane_misregistration(runID, algorithm, confi
 %% Testing the sensitivity of the printer to color plane misregistration
 
 %% create printer
-printer=LazerPrinter(config,true);
+printer=LaserPrinter(config,true);
 %printer=PerfectPrinter(config);
 
 %% test the sensitivity for natural images

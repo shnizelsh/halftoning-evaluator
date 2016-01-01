@@ -1,9 +1,6 @@
-
-
-
 function [ L ] = calibrate(algorithm, printer)
 % Calibrates the algorithm to address dot gain phenomenon.
-% the lagorithm returns Lookup table to apply on images.
+% the algorithm returns Lookup table to apply on images.
 %   algorithm - the algorithm you want to calibrate
 %   printer (Optional) - printer to perform the calibration
 
@@ -22,7 +19,7 @@ end
 disp('begin calibration');
 LUT=zeros(256,2);
 im = uint8(zeros(100,100,4));
-for i=0:255    
+for i=0:255
     im(:) = i;
     him=halftone(im , algorithm);
     pim=printer.print(him);

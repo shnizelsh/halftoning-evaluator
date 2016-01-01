@@ -6,23 +6,13 @@ function main()
 close all;
 algorithms = get_algorithms();
 config = get_default_config();
-
+i=0;
 
 % test sensitivity to dot size variation for verious maximal dot sizes
 for i=0:0.05:0.2
     config.max_dot_size_variation=i;
     runID=['max_dot_size_variation' num2str(i)];
     for j = 1: size(algorithms,1)
-        algorithm = cell2mat(algorithms(j));
-        test_sensitivity_to_dot_size_variation(runID,algorithm,config);
-    end
-end
-
-% test sensitivity to dot size variation for verious banding frequency
-for i=0:0.2:2
-    config.banding_frequency=i;
-    runID=['banding_frequency' num2str(i)];
-    for j= 1: size(algorithms,1)
         algorithm = cell2mat(algorithms(j));
         test_sensitivity_to_dot_size_variation(runID,algorithm,config);
     end

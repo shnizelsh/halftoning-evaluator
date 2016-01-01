@@ -12,7 +12,7 @@ classdef Printer<handle
         end
         
         %% print method
-        function [ im_result, s ] = print( obj, cmyk_image, original_im )            
+        function [ im_result ] = print( obj, cmyk_image )            
             disp (['printing using ' obj.Name]);            
         end
         

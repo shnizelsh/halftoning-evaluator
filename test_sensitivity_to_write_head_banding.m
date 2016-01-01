@@ -2,7 +2,7 @@ function test_sensitivity_to_write_head_banding(runID, algorithm, config )
 % Testing the sensitivity of the printer to write-head banding
 
 %% create printer
-printer=LazerPrinter(config,false,false,true);
+printer=LaserPrinter(config,false,false,true);
 %printer=PerfectPrinter(config);
 
 %% test the sensitivity for natural images

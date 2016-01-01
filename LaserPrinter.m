@@ -1,20 +1,17 @@
-classdef LazerPrinter < PerfectPrinter
-    % Lazer Printer
+classdef LaserPrinter < PerfectPrinter
+    % Laser Printer
     %   This printer prints with artifacts
     
     properties
         use_color_plane_misregstration=false;
         use_dot_size_variation=false;
         use_write_head_banding=false;
-        SFF_results=[];
-        graininess_results=[];
-        banding_results=[]
     end
     
     methods
         
         %% Constructor
-        function obj = LazerPrinter(config,use_color_plane_misregstration,use_dot_size_variation,use_write_head_banding)
+        function obj = LaserPrinter(config,use_color_plane_misregstration,use_dot_size_variation,use_write_head_banding)
             
             if(~exist('use_color_plane_misregstration','var'))
                 use_color_plane_misregstration=false;
@@ -27,14 +24,15 @@ classdef LazerPrinter < PerfectPrinter
             end
             
             obj@PerfectPrinter(config);
-            obj.Name = 'Lazer Printer';
+            obj.Name = 'Laser Printer';
             
             obj.use_color_plane_misregstration = use_color_plane_misregstration;
             obj.use_dot_size_variation = use_dot_size_variation;
             obj.use_write_head_banding = use_write_head_banding;
         end
-                                      
-        function [ im_result,s,g,b ] = print( obj, cmyk_image, compare_im )
+        
+        %% The Print Method
+        function [ im_result ] = print( obj, cmyk_image )
             print@Printer(obj);
             
             if(obj.use_write_head_banding)
@@ -45,25 +43,18 @@ classdef LazerPrinter < PerfectPrinter
                 blockSizeY=size(cmyk_image,2); % entire row (number of columns) + padding
             end
             
-            obj.SFF_results=[];
-            obj.graininess_results=[];
-            obj.banding_results=[];
-            
             im_result = blockproc(cmyk_image,[blockSizeX blockSizeY],...
-                @(block)obj.print_internal(block,compare_im),'BorderSize',[10 10]);
-            
-            s=mean(obj.SFF_results);
-            g=mean(obj.graininess_results);
-            b=mean(obj.banding_results);
+                @(block)obj.print_internal(block),'BorderSize',[10 10]);
             
             %% note: pad-partial-blocks make the output image larger than the input
             %im_result = blockproc(cmyk_image,[blockSizeX blockSizeY],@obj.print_internal,'BorderSize',[10 10],'PadPartialBlocks',true);
         end
         
-        function [ im_result ] = print_internal( obj, block , compare_im )
+        %% print internal to be used in block proc
+        function [ im_result ] = print_internal( obj, block )
             
             cmyk_image = block.data;
-            drop = obj.last_drop;
+            drop = obj.default_ink_drop;
             if(obj.use_dot_size_variation)
                 sf = obj.calculate_drop_scale_factor(block);
                 drop = imresize(drop,sf);
@@ -84,12 +75,14 @@ classdef LazerPrinter < PerfectPrinter
                 printed(:,:,i)= cropped;
             end
             im_result = printed;
-            im_result = obj.degrade(im_result,block);
+            if(obj.use_color_plane_misregstration)
+                im_result = obj.simulate_color_plane_misregistration(im_result,block);
+            end
             im_result = imresize(im_result,1/obj.samples,'box','Antialiasing',true);
         end
         
         
-        %% calculate drop scale factor, Used to simulate dor size variation        
+        %% calculate drop scale factor, Used to simulate dor size variation
         function [sf] = calculate_drop_scale_factor(obj,block)
             max_dot_increase = obj.config.max_dot_size_variation;
             bands_freq=obj.config.banding_frequency;
@@ -97,17 +90,15 @@ classdef LazerPrinter < PerfectPrinter
         end
         
         %% simulate color plane misregstration
-        function [im_result]= degrade(obj,cmyk_image,block)
+        function [im_result]= simulate_color_plane_misregistration(obj,cmyk_image,block)
             
-            if(obj.use_color_plane_misregstration)
-                C = cmyk_image(:,:,1);
-                perc = block.location(1) / block.imageSize(1); % 0.0 .. 1.0
-                two_shifts=obj.config.max_shifting*2;
-                shift=round(perc*two_shifts-obj.config.max_shifting);   % -32 .. 32                              
-                C = circshift(C',shift); % shift columns (X axis)
-                C=C';
-                cmyk_image(:,:,1)=C;
-            end
+            C = cmyk_image(:,:,1);
+            perc = block.location(1) / block.imageSize(1); % 0.0 .. 1.0
+            two_shifts=obj.config.max_shifting*2;
+            shift=round(perc*two_shifts-obj.config.max_shifting);   % -32 .. 32
+            C = circshift(C',shift); % shift columns (X axis)
+            C=C';
+            cmyk_image(:,:,1)=C;
             im_result=cmyk_image;
         end
         
@@ -146,7 +137,7 @@ classdef LazerPrinter < PerfectPrinter
                 % copy down top
                 res(from2:to2-1,:)=uint8(res(from2:to2-1,:))+uint8(im(j:j+head_size-1,:));
                 
-                %update vars for next interation
+                %update vars for next iteration
                 gap=floor(max_gap*p);
                 from=to+gap;
                 to=from+head_size;

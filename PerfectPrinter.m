@@ -4,7 +4,7 @@ classdef PerfectPrinter < Printer
     
     %% Properties
     properties
-        last_drop=[];
+        default_ink_drop=[];
         samples = 11;% the resizing factor
     end
     
@@ -14,14 +14,11 @@ classdef PerfectPrinter < Printer
         function obj = PerfectPrinter(config)
             obj@Printer(config);
             obj.Name = 'Perfect Printer';
-            obj.last_drop = obj.calculate_drop();
+            obj.default_ink_drop = obj.calculate_drop();
         end
         
         %% the Print Method
-        function [ im_result,s,g,b ] = print( obj, cmyk_image, original_im )
-            s=-1;
-            g=-1;
-            b=-1;
+        function [ im_result ] = print( obj, cmyk_image )
             print@Printer(obj);
             [blockSizeX, blockSizeY] = bestblk([size(cmyk_image,1) size(cmyk_image,2)],500);
             im_result = blockproc(cmyk_image,[blockSizeX blockSizeY],@obj.print_internal,'BorderSize',[5 5],'PadPartialBlocks',true);
@@ -30,7 +27,7 @@ classdef PerfectPrinter < Printer
         %% print internal to be used in block proc
         function [ im_result ] = print_internal( obj, block )
             cmyk_image = block.data;
-            drop = obj.last_drop;
+            drop = obj.default_ink_drop;
             max_drop = max(drop(:));
             phase = floor(obj.samples/2);
             printed = zeros(size(cmyk_image,1)*obj.samples,size(cmyk_image,2)*obj.samples,size(cmyk_image,3));

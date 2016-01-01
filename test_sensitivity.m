@@ -6,7 +6,7 @@ function test_sensitivity(runID, algorithm, artifact, printer, natural_images )
 %   algorithm - the algorithm to test
 %   artifact - the artifact to check with (e.g. dot size variation,
 %   write-head banding, etc...)
-%   printer - the printer type to use (e.g. Lazer Printer)
+%   printer - the printer type to use (e.g. Laser Printer)
 %   natural_images- boolean determines whether to test with natural image
 %   set or plain test images
 
@@ -26,7 +26,12 @@ LUT = calibrate(algorithm);
 %% for each image
 for j = 1: size(images,2)
     
+    s=-1;
+    g=-1;
+    b=-1;
+    %% take starting time
     tic_id=tic;
+    
     %% get curent image
     full_path = images{j};
     
@@ -43,24 +48,20 @@ for j = 1: size(images,2)
     im = halftone(im ,algorithm);
     
     %% print
-    [im, s, g, b]= printer.print(im,im_original);
+    [im]= printer.print(im);
     
     %% evaluate
-    if(natural_images)
-        if(isnan(s) || s==-1)
-            im=cmyk2rgb(im,printer.config);
-            s = SFF(im_original, im, W);
-        end
-    else
-        if(isnan(g) || g==-1)
-            g = graininess_benchmark(im,printer.config);
-        end
-        if(isnan(b) || b==-1)
-            b = banding_benchmark(im,printer.config);
-        end
+    if(natural_images)        
+        im=cmyk2rgb(im,printer.config);
+        s = SFF(im_original, im, W);        
+    else        
+        g = graininess_benchmark(im,printer.config);        
+        b = banding_benchmark(im,printer.config);        
     end
     
+    %% measure time
     elapsedTime=toc(tic_id);
+    
     %% save result
     save_results(runID,elapsedTime,algorithm,printer,artifact,g,b,s,im,im_original,full_path);
     

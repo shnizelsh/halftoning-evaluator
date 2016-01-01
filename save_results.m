@@ -16,10 +16,10 @@ function save_results(runID,elapsedTime,algorithm,printer,method,g,b,s,im,im_ori
 %   im_original - the original image
 %   im_path - The original image path
 
-full_path_result=get_file_path(runID,im_path,printer.config,algorithm,'_result_',method);
-imwrite(im,full_path_result,'Compression','lzw');
-full_path_input=get_file_path(runID,im_path,printer.config,algorithm,'_input_',method);
-imwrite(im_original,full_path_input,'Compression','lzw');
+ full_path_result=get_file_path(runID,im_path,printer.config,algorithm,'_result_',method);
+ imwrite(im,full_path_result,'Compression','lzw');
+ full_path_input=get_file_path(runID,im_path,printer.config,algorithm,'_input_',method);
+ imwrite(im_original,full_path_input,'Compression','lzw');
 
 
 results_file = 'results/results.csv';
