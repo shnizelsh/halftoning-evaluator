@@ -5,7 +5,7 @@ function [ benchmark ] = graininess_benchmark(im, config )
 %   im - The image to perform the analysis (CMYK or RGB)
 %   config - the configuration of the test
 
-if(size(im,3)==4)  
+if(size(im,3)==4)
     im=cmyk2rgb(im,config);
 end
 if(size(im,3)==3)
@@ -15,7 +15,8 @@ end
 dpi = config.dpi;
 mm=1.27; % milimeter
 m=mm/1000; % meter
-inch = convlength(m,'m','in'); % inch
+%convlength(m,'m','in'); % inch
+inch = m*39.37; %convert mm to inch 
 patch_size = round(dpi * inch);
 
 n = round(size(im,1)/patch_size);
